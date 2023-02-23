@@ -5,7 +5,10 @@
     <title>Title</title>
 </head>
 <body>
-
-    <button id="id_fetch_btn">Fetch</button>
+    <form method="POST" action="{% url 'new_collection' %}">
+        <button id="id_fetch_btn" type="submit">Fetch</button>
+        {% csrf_token %}
+    </form>
+    {{ data }}
 </body>
 </html>

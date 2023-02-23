@@ -28,9 +28,9 @@ class NewFetchTest(base.FunctionalTest):
         fetch_button = self.browser.find_element(By.ID, "id_fetch_btn")
         self.assertEqual(fetch_button.text, "Fetch")
 
-        # # He clicks on the "fetch" button
-        # fetch_button.click()
-        #
+        # He clicks on the "fetch" button
+        fetch_button.click()
+
         # # The page updates, and he sees that a new item appeared in the collections table
         #
         # # Just to be sure that it was not a coincidence he clicks the button once again
