@@ -9,6 +9,10 @@
         <button id="id_fetch_btn" type="submit">Fetch</button>
         {% csrf_token %}
     </form>
-    {{ data }}
+    <table id="id_collections_table">
+        {% for file in data %}
+        <tr><td> {{ file }}</td></tr>
+        {% endfor %}
+    </table>
 </body>
 </html>

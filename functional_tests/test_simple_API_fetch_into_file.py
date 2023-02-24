@@ -1,6 +1,8 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from . import base
+import os
+from datacollections.fetch import get_media_files_names, WORK_DIR
 
 
 class NewFetchTest(base.FunctionalTest):
@@ -31,10 +33,13 @@ class NewFetchTest(base.FunctionalTest):
         # He clicks on the "fetch" button
         fetch_button.click()
 
-        # # The page updates, and he sees that a new item appeared in the collections table
-        #
-        # # Just to be sure that it was not a coincidence he clicks the button once again
-        #
-        # # The page updates again, and now he can see two records in the collections table
-        #
-        # # Satisfied
+        # The page updates, and he sees that a new item appeared in the collections table
+        self.wait_for_row_in_table(get_media_files_names(os.path.join(WORK_DIR, 'datacollections/media'))[0])
+
+        # Just to be sure that it was not a coincidence he clicks the button once again
+        fetch_button = self.browser.find_element(By.ID, "id_fetch_btn")
+        fetch_button.click()
+
+        # The page updates again, and now he can see two records in the collections table
+        self.wait_for_row_in_table(get_media_files_names(os.path.join(WORK_DIR, 'datacollections/media'))[1])
+        # Satisfied
