@@ -8,9 +8,11 @@ def home_page(request):
 
 
 def new_collection(request):
-    data = FetchData().fetch_data("https://jebac psy.dev/api/people/")
+    data = FetchData().create_csv_file()
+    # data = FetchData().fetch_data("https://swapi.dev/api/people/")
     if data is None:
         data = "Something went wrong"
+
     return render(request, 'datacollections/collections.html', {"data": data})
 
 
