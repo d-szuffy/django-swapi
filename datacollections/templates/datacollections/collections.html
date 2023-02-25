@@ -9,9 +9,12 @@
         <button id="id_fetch_btn" type="submit">Fetch</button>
         {% csrf_token %}
     </form>
+    {% if err %}
+        <p>Something went wrong.</p>
+    {% endif %}
     <table id="id_collections_table">
         {% for file in data %}
-        <tr><td> {{ file }}</td></tr>
+        <tr><td> <a href="{% url 'collection_details' file.id %}">{{ file.filename }} </a></td></tr>
         {% endfor %}
     </table>
 </body>
