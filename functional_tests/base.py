@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from django.conf import settings
-MAX_WAIT = 10
+MAX_WAIT = 15
 
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -20,7 +20,11 @@ class FunctionalTest(StaticLiveServerTestCase):
         if staging_sever:
             self.live_server_url = "http://" + staging_sever
 
+    # Deleting the files created during functional tests should be automated
+    # This manual removal needs refactoring
     def tearDown(self) -> None:
+        os.remove(os.path.join(settings.MEDIA_ROOT, self.get_media_files()[-1]))
+        os.remove(os.path.join(settings.MEDIA_ROOT, self.get_media_files()[-1]))
         self.browser.quit()
 
     def wait_for_row_in_table(self, row_text):
@@ -31,6 +35,16 @@ class FunctionalTest(StaticLiveServerTestCase):
                 rows = table.find_elements(By.TAG_NAME, "tr")
                 self.assertIn(row_text, [row.text for row in rows])
                 return
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
+
+    def wait_for(self, fn):
+        start_time = time.time()
+        while True:
+            try:
+                return fn()
             except (AssertionError, WebDriverException) as e:
                 if time.time() - start_time > MAX_WAIT:
                     raise e

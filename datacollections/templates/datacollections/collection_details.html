@@ -5,6 +5,21 @@
     <title>Title</title>
 </head>
 <body>
-    {{ dataset.filename }}
+    <h1>{{ dataset.filename }}</h1>
+    <table id="id_collection_details">
+        <tr>
+            {% for header in headers %}
+                <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+            <tr>
+                {% for td in row %}
+                    <td>{{ td }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+
+    </table>
 </body>
 </html>

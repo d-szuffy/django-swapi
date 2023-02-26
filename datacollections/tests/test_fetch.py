@@ -97,7 +97,7 @@ class TestFetchData(TestCase):
         result = FetchData().transform_data(PAGE_PEOPLE["results"], PAGE_PLANETS["results"])
 
         self.assertTrue(os.path.exists(result[1]))
-        self.assertEqual(mock_time.return_value, result[0])
+        self.assertEqual(mock_time.return_value + '.csv', result[0])
 
         os.remove(result[1])
 

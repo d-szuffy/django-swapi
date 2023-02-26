@@ -33,12 +33,20 @@ class NewFetchTest(base.FunctionalTest):
         fetch_button.click()
 
         # The page updates, and he sees that a new item appeared in the collections table
-        self.wait_for_row_in_table(self.get_media_files()[0])
+        self.wait_for(lambda: self.assertIn(
+            self.browser.find_element(By.CLASS_NAME, 'has-message').text,
+            "Data fetched successfully."
+        ))
+        self.wait_for_row_in_table(self.get_media_files()[-1])
 
         # Just to be sure that it was not a coincidence he clicks the button once again
         fetch_button = self.browser.find_element(By.ID, "id_fetch_btn")
         fetch_button.click()
 
         # The page updates again, and now he can see two records in the collections table
-        self.wait_for_row_in_table(self.get_media_files()[1])
+        self.wait_for(lambda: self.assertIn(
+            self.browser.find_element(By.CLASS_NAME, 'has-message').text,
+            "Data fetched successfully."
+        ))
+        self.wait_for_row_in_table(self.get_media_files()[-1])
         # Satisfied

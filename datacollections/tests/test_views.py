@@ -31,9 +31,41 @@ class CollectionPageView(TestCase):
 
 class NewCollectionTest(TestCase):
 
+    def new_collection_success(self):
+        file_name = '167777.csv'
+        path_to_file = os.path.join(settings.MEDIA_ROOT, file_name)
+        return file_name, path_to_file, "some table"
+
     @patch('datacollections.views.FetchData.create_csv_file')
-    def test_POST_throws_TypeError_when_API_inaccesible(self,
-                                                        mock_create_csv_file):
+    def test_adds_success_message(self, mock_create_csv_file):
+        mock_create_csv_file.return_value = self.new_collection_success()
+        response = self.client.post('/datacollections/new_collection', follow=True)
+        message = list(response.context['messages'])[0]
+
+        self.assertEqual(message.message,
+                         "Data fetched successfully."
+                         )
+
+    @patch('datacollections.fetch.FetchData.create_csv_file')
+    def test_adds_error_message(self, mock_create_csv_file):
+        mock_create_csv_file.return_value = None
+        response = self.client.post('/datacollections/new_collection', follow=True)
+        message = list(response.context['messages'])[0]
+
+        self.assertEqual(message.message,
+                         "Something went wrong"
+                         )
+
+    @patch('datacollections.views.FetchData.create_csv_file')
+    def test_redirects_to_view_collections(self, mock_create_csv_file):
+        mock_create_csv_file.return_value = self.new_collection_success()
+
+        response = self.client.post('/datacollections/new_collection')
+        self.assertRedirects(response, '/datacollections/')
+
+    @patch('datacollections.views.FetchData.create_csv_file')
+    def test_POST_throws_TypeError_when_API_inaccessible(self,
+                                                         mock_create_csv_file):
         mock_create_csv_file.return_value = None
         self.client.post('/datacollections/new_collection')
 
@@ -41,11 +73,9 @@ class NewCollectionTest(TestCase):
 
     @patch('datacollections.views.FetchData.create_csv_file')
     def test_POST_creates_dataset_associated_with_fetched_CSV(self, mock_create_csv_file):
-        file_name = '167777.csv'
-        path_to_file = os.path.join(settings.MEDIA_ROOT, file_name)
-        mock_create_csv_file.return_value = (file_name, path_to_file, 'Some table')
+        mock_create_csv_file.return_value = self.new_collection_success()
         self.client.post('/datacollections/new_collection')
 
         dataset = DataSet.objects.first()
 
-        self.assertEqual(dataset.file_path, path_to_file)
+        self.assertEqual(dataset.file_path, self.new_collection_success()[1])
