@@ -64,6 +64,7 @@ class InspectDataTest(base.FunctionalTest):
 
         # To be sure that the button works he clicks it again.
         # Another 10 rows loaded
+        load_more_btn = self.browser.find_element(By.ID, 'id_load_more')
         load_more_btn.click()
         table = self.browser.find_element(By.ID, 'id_collection_details')
         table_rows = table.find_elements(By.TAG_NAME, 'tr')

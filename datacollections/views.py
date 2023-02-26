@@ -1,5 +1,8 @@
+import itertools
+
 from django.shortcuts import render, redirect
 import os
+from django.core.paginator import Paginator
 from .fetch import FetchData
 from .models import DataSet
 from django.contrib import messages
@@ -39,20 +42,25 @@ def view_collections(request):
 
 
 def collection_details(request, col_id):
-    table_data = {}
-    table_headers = {}
-    dataset = {}
+    context = {}
     try:
         dataset = DataSet.objects.get(id=col_id)
         table_headers = InspectData().get_headers(dataset)
         table_data = InspectData().get_data(dataset)
+        paginator = Paginator(table_data, 10)
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        all_pages = [list(paginator.get_page(i)) for i in range(1, int(page_number) + 1)]
+        all_pages = itertools.chain.from_iterable(all_pages)
+
+        context = {
+            "dataset": dataset,
+            "data": all_pages,
+            "page_obj": page_obj,
+            "headers": table_headers,
+        }
     except DataSet.DoesNotExist:
         print("upsi")
-
-    context = {
-        "dataset": dataset,
-        "data": table_data,
-        "headers": table_headers,
-    }
 
     return render(request, 'datacollections/collection_details.html', context)

@@ -21,5 +21,12 @@
         {% endfor %}
 
     </table>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_next %}
+                <a id="id_load_more" href="?page={{ page_obj.next_page_number }}">Load more</a>
+            {% endif %}
+        </span>
+    </div>
 </body>
 </html>
