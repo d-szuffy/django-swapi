@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+import os
 from .fetch import FetchData
 from .models import DataSet
 # Create your views here.
@@ -30,8 +31,6 @@ def view_collections(request):
 
 
 def collection_details(request, col_id):
-    print("Co tu sie")
-    print(col_id)
     try:
         dataset = DataSet.objects.get(id=col_id)
     except DataSet.DoesNotExist:

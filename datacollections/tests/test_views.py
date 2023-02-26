@@ -1,6 +1,8 @@
 from django.test import TestCase
 from datacollections.models import DataSet
 from unittest.mock import patch, Mock
+import os
+from django.conf import settings
 
 
 class CollectionPageView(TestCase):
@@ -10,8 +12,8 @@ class CollectionPageView(TestCase):
         self.assertTemplateUsed(response, 'datacollections/collections.html')
 
     def test_displays_only_created_files(self):
-        file1 = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
-        file2 = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
+        DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
 
         response = self.client.get("/datacollections/")
 
@@ -29,11 +31,21 @@ class CollectionPageView(TestCase):
 
 class NewCollectionTest(TestCase):
 
-    def test_POST_returns_None_when_API_is_inaccesible(self):
-        self.fail("Write this test")
-
     @patch('datacollections.views.FetchData.create_csv_file')
-    def test_POST_fetch_data_to_json(self, mock_create_csv_file):
+    def test_POST_throws_TypeError_when_API_inaccesible(self,
+                                                        mock_create_csv_file):
+        mock_create_csv_file.return_value = None
         self.client.post('/datacollections/new_collection')
 
-        self.fail("Write me!")
+        self.assertRaises(TypeError)
+
+    @patch('datacollections.views.FetchData.create_csv_file')
+    def test_POST_creates_dataset_associated_with_fetched_CSV(self, mock_create_csv_file):
+        file_name = '167777.csv'
+        path_to_file = os.path.join(settings.MEDIA_ROOT, file_name)
+        mock_create_csv_file.return_value = (file_name, path_to_file, 'Some table')
+        self.client.post('/datacollections/new_collection')
+
+        dataset = DataSet.objects.first()
+
+        self.assertEqual(dataset.file_path, path_to_file)

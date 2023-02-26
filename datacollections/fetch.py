@@ -7,6 +7,7 @@ import collections
 
 import requests
 import itertools
+from django.conf import settings
 import time
 import os
 import pathlib
@@ -15,6 +16,7 @@ import json
 from requests.exceptions import ConnectionError, InvalidURL, MissingSchema, InvalidSchema
 from collections import UserDict
 WORK_DIR = os.getcwd()
+
 
 COLUMNS = ['name',
            'height',
@@ -85,10 +87,15 @@ class FetchData(object):
                                       lambda rec: rec["edited"].split("T")[0])
         # Drop all unnecessary columns
         people_table4 = petl.cut(people_table3, *COLUMNS)
-
+        # File name represented as unix time guarantees uniqueness
         file_name = str(time.time())
-        path = os.path.join(WORK_DIR, f"datacollections/media/{file_name}")
+
+        # All files will be stored in app's MEDIA_ROOT dir
+        path = os.path.join(settings.MEDIA_ROOT, file_name + '.csv')
         petl.tocsv(people_table4, path)
+
+        # needs some refactoring, it is enough to return only file_name
+        # and based on it locate the file in the media_root folder.
         return file_name, path, people_table4
 
     def create_csv_file(self):
@@ -97,11 +104,3 @@ class FetchData(object):
         if people is not None and homeworlds is not None:
             return self.transform_data(people, homeworlds)
         return None
-
-
-# Defined this method outside FetchData class because I also use it in the FTs
-def get_media_files_names(directory):
-    files = []
-    for filename in os.listdir(directory):
-        files.append(filename)
-    return files

@@ -2,3 +2,4 @@ venv/
 .idea/
 datacollections/media/
 geckodriver.log
+db.*

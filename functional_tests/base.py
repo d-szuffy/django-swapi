@@ -5,7 +5,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
-
+from django.conf import settings
 MAX_WAIT = 10
 
 
@@ -35,3 +35,6 @@ class FunctionalTest(StaticLiveServerTestCase):
                 if time.time() - start_time > MAX_WAIT:
                     raise e
                 time.sleep(0.5)
+
+    def get_media_files(self):
+        return [file for file in os.listdir(settings.MEDIA_ROOT)]
