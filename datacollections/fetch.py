@@ -84,12 +84,12 @@ class FetchData(object):
                                       'date',
                                       lambda rec: rec["edited"].split("T")[0])
         # Drop all unnecessary columns
-        people_table4 = petl.cutout(people_table3, *COLUMNS)
+        people_table4 = petl.cut(people_table3, *COLUMNS)
 
         file_name = str(time.time())
         path = os.path.join(WORK_DIR, f"datacollections/media/{file_name}")
         petl.tocsv(people_table4, path)
-        return file_name, path
+        return file_name, path, people_table4
 
     def create_csv_file(self):
         people = self.get_complete_dataset("https://swapi.dev/api/people/")
