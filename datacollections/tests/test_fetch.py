@@ -150,8 +150,8 @@ class TestFetchData(TestCase):
     @patch('datacollections.fetch.FetchData.transform_data')
     @patch('datacollections.fetch.FetchData.get_complete_dataset')
     def test_create_csv_file_returns_None_when_homeworlds_and_people_invalid(self,
-                                                                     mock_get_complete_data_set,
-                                                                     mock_transform_data):
+                                                                             mock_get_complete_data_set,
+                                                                             mock_transform_data):
         mock_get_complete_data_set.side_effect = [
             None,
             None

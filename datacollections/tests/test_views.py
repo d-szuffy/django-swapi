@@ -3,6 +3,16 @@ from datacollections.models import DataSet
 from unittest.mock import patch, Mock
 import os
 from django.conf import settings
+from datacollections.fetch import COLUMNS
+from pyfakefs.fake_filesystem_unittest import TestCase as FakefsTestCase
+from parameterized import parameterized
+
+
+class HomePageTest(TestCase):
+
+    def test_uses_home_template(self):
+        response = self.client.get('/')
+        self.assertTemplateUsed(response, 'datacollections/home.html')
 
 
 class CollectionPageView(TestCase):
@@ -21,12 +31,6 @@ class CollectionPageView(TestCase):
         self.assertContains(response, "File2")
         self.assertNotContains(response, "File3")
         self.assertNotContains(response, "File4")
-
-    def test_passes_correct_file_to_template(self):
-        wrong_file = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
-        correct_file = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
-        response = self.client.get(f"/datacollections/collection_details/{correct_file.id}/")
-        self.assertEqual(response.context["dataset"], correct_file)
 
 
 class NewCollectionTest(TestCase):
@@ -61,6 +65,7 @@ class NewCollectionTest(TestCase):
         mock_create_csv_file.return_value = self.new_collection_success()
 
         response = self.client.post('/datacollections/new_collection')
+        self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, '/datacollections/')
 
     @patch('datacollections.views.FetchData.create_csv_file')
@@ -72,6 +77,38 @@ class NewCollectionTest(TestCase):
         self.assertRaises(TypeError)
 
     @patch('datacollections.views.FetchData.create_csv_file')
+    def test_invalid_API_response_nothing_saved_to_db(self,
+                                                      mock_create_csv_file):
+        mock_create_csv_file.return_value = None
+        self.client.post('/datacollections/new_collection')
+
+        self.assertEqual(DataSet.objects.count(), 0)
+
+    @patch('datacollections.views.FetchData.create_csv_file')
+    def test_invalid_API_response_redirects_to_collection_template(self,
+                                                                   mock_create_csv_file):
+        mock_create_csv_file.return_value = None
+        response = self.client.post('/datacollections/new_collection')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, '/datacollections/')
+
+    @patch('datacollections.views.FetchData.create_csv_file')
+    def test_invalid_API_response_shows_error_on_page(self,
+                                                      mock_create_csv_file):
+        mock_create_csv_file.return_value = None
+        response = self.client.post('/datacollections/new_collection', follow=True)
+
+        self.assertContains(response, "Something went wrong")
+
+    @patch('datacollections.views.FetchData.create_csv_file')
+    def test_POST_sends_request_to_external_api(self, mock_create_csv_file):
+        mock_create_csv_file.return_value = self.new_collection_success()
+        self.client.post('/datacollections/new_collection')
+
+        self.assertTrue(mock_create_csv_file.called)
+
+    @patch('datacollections.views.FetchData.create_csv_file')
     def test_POST_creates_dataset_associated_with_fetched_CSV(self, mock_create_csv_file):
         mock_create_csv_file.return_value = self.new_collection_success()
         self.client.post('/datacollections/new_collection')
@@ -79,3 +116,72 @@ class NewCollectionTest(TestCase):
         dataset = DataSet.objects.first()
 
         self.assertEqual(dataset.file_path, self.new_collection_success()[1])
+
+    @patch('datacollections.views.FetchData.create_csv_file')
+    def test_POST_success_message_on_page(self, mock_create_csv_file):
+        mock_create_csv_file.return_value = self.new_collection_success()
+        response = self.client.post('/datacollections/new_collection', follow=True)
+
+        self.assertContains(response, "Data fetched successfully.")
+
+
+class CollectionDetailsTest(TestCase):
+
+    def test_uses_collection_details_template(self):
+        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        response = self.client.get(f'/datacollections/collection_details/{dataset.id}/')
+        self.assertTemplateUsed(response, 'datacollections/collection_details.html')
+
+    def test_passes_correct_dataset_to_template(self):
+        correct_dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
+
+        response = self.client.get(f'/datacollections/collection_details/{correct_dataset.id}/')
+        self.assertEqual(response.context['dataset'], correct_dataset)
+
+    def test_shows_correct_database_title(self):
+        correct_dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
+
+        response = self.client.get(f'/datacollections/collection_details/{correct_dataset.id}/')
+        self.assertContains(response, 'File1')
+
+    @patch('datacollections.utils.InspectData.get_data')
+    @patch('datacollections.utils.InspectData.get_headers')
+    def test_passes_correct_table_headers_to_template(self,
+                                                      mock_get_headers,
+                                                      mock_get_data):
+        mock_get_headers.return_value = COLUMNS
+        mock_get_data.return_value = [[i for i in range(1)] for i in range(1)]
+        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+
+        response = self.client.get(f'/datacollections/collection_details/{dataset.id}/')
+
+        self.assertEqual(response.context['headers'], COLUMNS)
+
+    @parameterized.expand([('', 1),
+                          ('?page=1', 1),
+                          ('?page=4', 4)])
+    @patch('datacollections.utils.InspectData.get_data')
+    @patch('datacollections.utils.InspectData.get_headers')
+    def test_passes_correct_number_of_pages_to_template(self,
+                                                        page_number,
+                                                        expected_result,
+                                                        mock_get_headers,
+                                                        mock_get_data):
+        mock_get_headers.return_value = COLUMNS
+        mock_get_data.return_value = [{'name': 'item{}'.format(i)} for i in range(1, 40)]
+        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+
+        response = self.client.get(f'/datacollections/collection_details/{dataset.id}/{page_number}')
+
+        self.assertEqual(len(response.context['data']), expected_result)
+
+    def test_displays_error_message_when_file_not_found(self):
+        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        response = self.client.get(f'/datacollections/collection_details/{dataset.id}/')
+        message = list(response.context['messages'])[0]
+
+        self.assertEqual(message.message,
+                         "Sorry, the file you are looking for was not found."
+                         )

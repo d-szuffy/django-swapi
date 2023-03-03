@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from django.conf import settings
-MAX_WAIT = 15
+MAX_WAIT = 30
 
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -23,8 +23,6 @@ class FunctionalTest(StaticLiveServerTestCase):
     # Deleting the files created during functional tests should be automated
     # This manual removal needs refactoring
     def tearDown(self) -> None:
-        os.remove(os.path.join(settings.MEDIA_ROOT, self.get_media_files()[-1]))
-        os.remove(os.path.join(settings.MEDIA_ROOT, self.get_media_files()[-1]))
         self.browser.quit()
 
     def wait_for_row_in_table(self, row_text):

@@ -6,27 +6,49 @@
 </head>
 <body>
     <h1>{{ dataset.filename }}</h1>
-    <table id="id_collection_details">
-        <tr>
-            {% for header in headers %}
-                <th>{{ header }}</th>
-            {% endfor %}
-        </tr>
-        {% for row in data %}
-            <tr>
-                {% for td in row %}
-                    <td>{{ td }}</td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
-
-    </table>
-    <div class="pagination">
-        <span class="step-links">
-            {% if page_obj.has_next %}
-                <a id="id_load_more" href="?page={{ page_obj.next_page_number }}">Load more</a>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.level_tag == 'success' %}
+                <p class="has-message" style="color: green;">{{ message }}</p>
+            {% else %}
+                <p class="has-message" style="color: red">{{ message }}</p>
             {% endif %}
-        </span>
-    </div>
+        {% endfor %}
+    {% else %}
+        <form method="GET" action="{% url 'value_count' dataset.pk %}">
+            <table id="id_collection_details">
+                <tr>
+                    {% for header in headers %}
+                        <th>
+                            <input type="checkbox" id="id_{{ header }}" name="checks[]" value="{{ header }}">
+                            <label>{{ header }}</label>
+                        </th>
+                    {% endfor %}
+                    <th>
+                        <a href="">
+                            <input type="submit" value="Value count">
+                        </a>
+                    </th>
+                </tr>
+                {% for page in data %}
+                    {% for row in page %}
+                        <tr>
+                                {% for td in row %}
+                                    <td>{{ td }}</td>
+                                {% endfor %}
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+
+            </table>
+        </form>
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_next %}
+                    <a id="id_load_more" href="?page={{ page_obj.next_page_number }}">Load more</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
 </body>
 </html>
