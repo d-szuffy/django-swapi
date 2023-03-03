@@ -1,7 +1,7 @@
 import petl
 
 
-def group_by(path, columns):
+def group_by_columns(path, columns):
     """
     This function cuts only specified columns from petl table and then groups data rows by them.
     """
@@ -9,7 +9,7 @@ def group_by(path, columns):
     table2 = petl.cut(table, *columns)
     headers = petl.fieldnames(table2)
 
-    return petl.aggregate(table, key=headers, aggregation=len)
+    return petl.aggregate(table, key=headers, aggregation=len, field="Count")
 
 
 def get_data(path):

@@ -16,20 +16,20 @@
         {% endfor %}
     {% else %}
         <table id="id_collection_details">
-            <tr>
-                {% for header in headers %}
-                    <th>
-                        <input type="checkbox" id="id_{{ header }}" name="checks[]" value="{{ header }}">
-                        <label>{{ header }}</label>
-                    </th>
-                {% endfor %}
-            </tr>
             {% for row in data %}
-                <tr>
-                        {% for td in row %}
-                            <td>{{ td }}</td>
+                {% if forloop.first %}
+                    <tr>
+                        {% for header in row %}
+                            <th>{{ header }}</th>
                         {% endfor %}
-                </tr>
+                    </tr>
+                {% else %}
+                    <tr>
+                            {% for td in row %}
+                                <td>{{ td }}</td>
+                            {% endfor %}
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
     {% endif %}

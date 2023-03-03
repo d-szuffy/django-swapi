@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from datacollections.models import DataSet
 from unittest.mock import patch, Mock
 import os
@@ -6,7 +6,9 @@ from django.conf import settings
 from datacollections.fetch import COLUMNS
 from pyfakefs.fake_filesystem_unittest import TestCase as FakefsTestCase
 from parameterized import parameterized
-
+from datacollections import views
+from datacollections.fetch import FetchData
+import constants
 
 class HomePageTest(TestCase):
 
@@ -139,15 +141,15 @@ class CollectionDetailsTest(TestCase):
         response = self.client.get(f'/datacollections/collection_details/{correct_dataset.id}/')
         self.assertEqual(response.context['dataset'], correct_dataset)
 
-    def test_shows_correct_database_title(self):
+    def test_shows_correct_dataset_title(self):
         correct_dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
         wrong_dataset = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
 
         response = self.client.get(f'/datacollections/collection_details/{correct_dataset.id}/')
         self.assertContains(response, 'File1')
 
-    @patch('datacollections.utils.InspectData.get_data')
-    @patch('datacollections.utils.InspectData.get_headers')
+    @patch('datacollections.utils.get_data')
+    @patch('datacollections.utils.get_headers')
     def test_passes_correct_table_headers_to_template(self,
                                                       mock_get_headers,
                                                       mock_get_data):
@@ -162,8 +164,8 @@ class CollectionDetailsTest(TestCase):
     @parameterized.expand([('', 1),
                           ('?page=1', 1),
                           ('?page=4', 4)])
-    @patch('datacollections.utils.InspectData.get_data')
-    @patch('datacollections.utils.InspectData.get_headers')
+    @patch('datacollections.utils.get_data')
+    @patch('datacollections.utils.get_headers')
     def test_passes_correct_number_of_pages_to_template(self,
                                                         page_number,
                                                         expected_result,
@@ -185,3 +187,57 @@ class CollectionDetailsTest(TestCase):
         self.assertEqual(message.message,
                          "Sorry, the file you are looking for was not found."
                          )
+
+
+class ValueCountViewTest(FakefsTestCase):
+
+    def setUp(self) -> None:
+        self.setUpPyfakefs()
+
+    def create_fake_csv(self):
+        filename, path, table = FetchData().transform_data(constants.PAGE_PEOPLE['results'],
+                                                           constants.PAGE_PLANETS['results'])
+
+
+    @patch('datacollections.utils.group_by_columns')
+    def test_uses_value_count_template(self, mock_group_by_columns):
+        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        checks = '?checks%5B%5D={}&checks%5B%5D={}'.format('name', 'homeworld')
+        mock_group_by_columns.return_value = ['test']
+
+        response = self.client.get(f'/datacollections/collection_details/value_count/{dataset.id}/{checks}')
+        self.assertTemplateUsed(response, 'datacollections/value_count.html')
+
+    @patch('datacollections.utils.group_by_columns')
+    def test_passes_correct_dataset_to_template(self, mock_group_by_columns):
+        correct_dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
+        checks = '?checks%5B%5D={}&checks%5B%5D={}'.format('name', 'homeworld')
+        mock_group_by_columns.return_value = ['test']
+
+        response = self.client.get(f'/datacollections/collection_details/value_count/{correct_dataset.id}/{checks}')
+        self.assertEqual(response.context['dataset'], correct_dataset)
+
+    @patch('datacollections.utils.group_by_columns')
+    def test_shows_correct_dataset_title(self, mock_group_by_columns):
+        correct_dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
+        checks = '?checks%5B%5D={0}&checks%5B%5D={1}'.format('name', 'homeworld')
+        mock_group_by_columns.return_value = ['test']
+
+        response = self.client.get(f'/datacollections/collection_details/value_count/{correct_dataset.id}/{checks}')
+        self.assertContains(response, 'File1')
+
+    @patch('datacollections.utils.group_by_columns')
+    def test_parse_correct_columns_from_url(self, mock_group_by_columns):
+        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        checks = '?checks%5B%5D={0}&checks%5B%5D={1}'.format('name', 'homeworld')
+        mock_group_by_columns.return_value = ['test']
+
+        response = self.client.get()
+
+        #request = factory.get(f'/datacollections/collection_details/value_count/{dataset.id}/', {'checks[]': columns})
+        #print(request)
+        # response = self.client.get(f'/datacollections/collection_details/value_count/{dataset.id}/?{checks}')
+        #
+        # self.assertEqual(response.context("checks[]"), columns)

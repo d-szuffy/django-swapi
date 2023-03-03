@@ -37,6 +37,7 @@ class NewFetchTest(base.FunctionalTest):
             self.browser.find_element(By.CLASS_NAME, 'has-message').text,
             "Data fetched successfully."
         ))
+        print("MEDIA FILES: ", self.get_media_files())
         self.wait_for_row_in_table(self.get_media_files()[-1])
 
         # Just to be sure that it was not a coincidence he clicks the button once again
@@ -48,5 +49,6 @@ class NewFetchTest(base.FunctionalTest):
             self.browser.find_element(By.CLASS_NAME, 'has-message').text,
             "Data fetched successfully."
         ))
+        print("MEDIA FILES: ", self.get_media_files())
         self.wait_for_row_in_table(self.get_media_files()[-1])
         # Satisfied

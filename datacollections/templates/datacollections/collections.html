@@ -20,7 +20,11 @@
     {% endif %}
     <table id="id_collections_table">
         {% for file in data %}
-        <tr><td> <a href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a></td></tr>
+        <tr>
+            <td>
+                <a href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a>
+            </td>
+        </tr>
         {% endfor %}
     </table>
 </body>

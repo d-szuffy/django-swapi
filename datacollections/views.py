@@ -70,24 +70,22 @@ def collection_details(request, col_id):
 
 
 def value_count(request, col_id):
-    columns = request.GET.getlist("checks[]")
-    dataset = get_object_or_404(DataSet, id=col_id)
     try:
-        table_headers = utils.get_headers(dataset.file_path, columns)
-        table_data = utils.get_data(dataset.file_path)
-        grouped_data = utils.group_by(dataset.file_path, columns)
+        columns = request.GET.getlist("checks[]")
+        dataset = DataSet.objects.get(id=col_id)
+        grouped_data = utils.group_by_columns(dataset.file_path, columns)
         context = {
             "dataset": dataset,
             "data": grouped_data,
-            "headers": table_headers,
+            "columns": columns
         }
-    except FileNotFoundError:
-        context = {
-            'dataset': dataset
-        }
+        return render(request, 'datacollections/value_count.html', context)
+
+    except (TypeError, FileNotFoundError):
         messages.error(
             request,
-            "Sorry, the file you are looking for was not found."
+            "You must check columns to group by and value count."
         )
-
-    return render(request, 'datacollections/value_count.html', context)
+        return redirect(collection_details, col_id=col_id)
+    except DataSet.DoesNotExist:
+        return redirect('view_collections')

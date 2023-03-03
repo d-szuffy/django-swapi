@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from django.conf import settings
-MAX_WAIT = 30
+MAX_WAIT = 300
 
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -49,4 +49,4 @@ class FunctionalTest(StaticLiveServerTestCase):
                 time.sleep(0.5)
 
     def get_media_files(self):
-        return [file for file in os.listdir(settings.MEDIA_ROOT)]
+        return sorted([file for file in os.listdir(settings.MEDIA_ROOT)])

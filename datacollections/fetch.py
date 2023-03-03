@@ -44,6 +44,7 @@ class FetchData(object):
             return None
 
     def send_get_request_to(self, url):
+        print("request sent")
         try:
             response = requests.get(url)
             return response.json()
