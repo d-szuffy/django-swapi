@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "datacollections/base.html" %}
+{% load static %}
+
+{% block content %}
     <h1>{{ dataset.filename }}</h1>
     {% if messages %}
         {% for message in messages %}
@@ -16,10 +13,10 @@
         {% endfor %}
     {% endif %}
     <form method="GET" action="{% url 'value_count' dataset.pk %}">
-        <table id="id_collection_details">
+        <table id="id_collection_details" class="table table-hover mt-2">
             <tr>
                 {% for header in headers %}
-                    <th>
+                    <th scope="col" class="collections-row">
                         <input type="checkbox" id="id_{{ header }}" name="checks[]" value="{{ header }}">
                         <label>{{ header }}</label>
                     </th>
@@ -30,9 +27,9 @@
             </tr>
             {% for page in data %}
                 {% for row in page %}
-                    <tr>
+                    <tr class="collections-row">
                             {% for td in row %}
-                                <td>{{ td }}</td>
+                                <th scope="row">{{ td }}</th>
                             {% endfor %}
                     </tr>
                 {% endfor %}
@@ -47,5 +44,4 @@
             {% endif %}
         </span>
     </div>
-</body>
-</html>
+{% endblock %}

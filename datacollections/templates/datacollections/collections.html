@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "datacollections/base.html" %}
+{% load static %}
+
+{% block content %}
     <form method="POST" action="{% url 'new_collection' %}">
-        <button id="id_fetch_btn" type="submit">Fetch</button>
+        <button id="id_fetch_btn" type="submit" class="btn btn-dark mt-2">Fetch</button>
         {% csrf_token %}
     </form>
     {% if messages %}
@@ -18,14 +15,13 @@
             {% endif %}
         {% endfor %}
     {% endif %}
-    <table id="id_collections_table">
+    <table id="id_collections_table" class="table table-hover mt-2">
         {% for file in data %}
         <tr>
-            <td>
-                <a href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a>
-            </td>
+            <th scope="row">
+                <a class="collections-row" href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a>
+            </th>
         </tr>
         {% endfor %}
     </table>
-</body>
-</html>
+{% endblock %}
