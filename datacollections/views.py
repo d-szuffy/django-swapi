@@ -19,7 +19,7 @@ def new_collection(request):
 
     if request.method == "POST":
         try:
-            filename, path, _ = FetchData().create_csv_file()
+            filename, path = FetchData().create_csv_file()
             new_file = DataSet.objects.create(filename=filename, file_path=path)
             new_file.save()
             messages.success(

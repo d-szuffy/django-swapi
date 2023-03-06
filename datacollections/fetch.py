@@ -44,9 +44,9 @@ class FetchData(object):
             return None
 
     def send_get_request_to(self, url):
-        print("request sent")
         try:
             response = requests.get(url)
+            print("request has been sent")
             return response.json()
         except (ConnectionError, InvalidURL, MissingSchema, InvalidSchema):
             return None
@@ -88,20 +88,19 @@ class FetchData(object):
                                       lambda rec: rec["edited"].split("T")[0])
         # Drop all unnecessary columns
         people_table4 = petl.cut(people_table3, *COLUMNS)
-        # File name represented as unix time guarantees uniqueness
-        file_name = str(time.time()) + '.csv'
 
-        # All files will be stored in app's MEDIA_ROOT dir
-        path = os.path.join(settings.MEDIA_ROOT, file_name)
-        petl.tocsv(people_table4, path)
-
-        # needs some refactoring, it is enough to return only file_name
-        # and based on it locate the file in the media_root folder.
-        return file_name, path, people_table4
+        return people_table4
 
     def create_csv_file(self):
         people = self.get_complete_dataset("https://swapi.dev/api/people/")
         homeworlds = self.get_complete_dataset("https://swapi.dev/api/planets/")
         if people is not None and homeworlds is not None:
-            return self.transform_data(people, homeworlds)
+            # File name represented as unix time guarantees uniqueness
+            file_name = str(time.time()) + '.csv'
+
+            # All files will be stored in app's MEDIA_ROOT dir
+            path = os.path.join(settings.MEDIA_ROOT, file_name)
+            table = self.transform_data(people, homeworlds)
+            petl.tocsv(table, path)
+            return file_name, path
         return None

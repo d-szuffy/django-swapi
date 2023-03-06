@@ -78,7 +78,7 @@ class TestFetchData(TestCase):
             dict(name='homeworld_resolved', field='homeworld', assertion=lambda v: "https" not in v)
             ]
 
-        _, file_path, result_table = FetchData().transform_data(PAGE_PEOPLE["results"], PAGE_PLANETS["results"])
+        result_table = FetchData().transform_data(PAGE_PEOPLE["results"], PAGE_PLANETS["results"])
 
         # After reviewing petl's docs I decided to not reinvent the wheel and test
         # the behaviour of transform_data() function with the use of validate() method
@@ -86,36 +86,30 @@ class TestFetchData(TestCase):
 
         # If the validate method does not find any problems the table must have 0 rows.
         self.assertFalse(petl.nrows(problems))
-        # Check if file is created
-        self.assertTrue(os.path.exists(file_path))
-        # Remove file created in the test
-        os.remove(file_path)
+        # # Check if file is created
+        # self.assertTrue(os.path.exists(file_path))
+        # # Remove file created in the test
+        # os.remove(file_path)
 
     @patch('time.time')
-    def test_transform_returns_file_name(self, mock_time):
-        mock_time.return_value = str(1677777)
-        result = FetchData().transform_data(PAGE_PEOPLE["results"], PAGE_PLANETS["results"])
-
-        self.assertTrue(os.path.exists(result[1]))
-        self.assertEqual(mock_time.return_value + '.csv', result[0])
-
-        os.remove(result[1])
-
     @patch('datacollections.fetch.FetchData.transform_data')
     @patch('datacollections.fetch.FetchData.get_complete_dataset')
     def test_create_csv_file_returns_file_name_when_people_and_homeworlds_are_valid(self,
-                                                                                 mock_get_complete_data_set,
-                                                                                 mock_transform_data):
+                                                                                    mock_get_complete_data_set,
+                                                                                    mock_transform_data,
+                                                                                    mock_time):
         mock_get_complete_data_set.side_effect = [
             PAGE_PEOPLE["results"],
             PAGE_PLANETS["results"]
         ]
-
-        mock_transform_data.return_value = ('167777', '/Path/', 'some_table')
+        mock_transform_data.return_value = 'some_table'
+        mock_time.return_value = '16777'
         result = FetchData().create_csv_file()
 
+        self.assertTrue(os.path.exists(result[1]))
         self.assertTrue(mock_transform_data.called)
-        self.assertEqual(result[0], mock_transform_data.return_value[0])
+        self.assertEqual(result[0], mock_time.return_value + '.csv')
+        os.remove(result[1])
 
     @patch('datacollections.fetch.FetchData.transform_data')
     @patch('datacollections.fetch.FetchData.get_complete_dataset')

@@ -3,4 +3,4 @@ venv/
 datacollections/media/
 geckodriver.log
 db.*
-/__pycache__/
+**/__pycache__/

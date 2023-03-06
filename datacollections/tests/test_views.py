@@ -4,11 +4,14 @@ from unittest.mock import patch, Mock
 import os
 from django.conf import settings
 from datacollections.fetch import COLUMNS
-from pyfakefs.fake_filesystem_unittest import TestCase as FakefsTestCase
+from pyfakefs.fake_filesystem_unittest import Patcher
 from parameterized import parameterized
+from pyfakefs.fake_filesystem_unittest import patchfs
 from datacollections import views
 from datacollections.fetch import FetchData
-import constants
+from datacollections.tests.constants import PAGE_PEOPLE, PAGE_PLANETS
+from petl import tocsv
+
 
 class HomePageTest(TestCase):
 
@@ -40,7 +43,7 @@ class NewCollectionTest(TestCase):
     def new_collection_success(self):
         file_name = '167777.csv'
         path_to_file = os.path.join(settings.MEDIA_ROOT, file_name)
-        return file_name, path_to_file, "some table"
+        return file_name, path_to_file
 
     @patch('datacollections.views.FetchData.create_csv_file')
     def test_adds_success_message(self, mock_create_csv_file):
@@ -189,19 +192,11 @@ class CollectionDetailsTest(TestCase):
                          )
 
 
-class ValueCountViewTest(FakefsTestCase):
-
-    def setUp(self) -> None:
-        self.setUpPyfakefs()
-
-    def create_fake_csv(self):
-        filename, path, table = FetchData().transform_data(constants.PAGE_PEOPLE['results'],
-                                                           constants.PAGE_PLANETS['results'])
-
+class ValueCountViewTest(TestCase):
 
     @patch('datacollections.utils.group_by_columns')
     def test_uses_value_count_template(self, mock_group_by_columns):
-        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        dataset = DataSet.objects.create(filename="File1", file_path="/test/test1.csv")
         checks = '?checks%5B%5D={}&checks%5B%5D={}'.format('name', 'homeworld')
         mock_group_by_columns.return_value = ['test']
 
@@ -210,8 +205,8 @@ class ValueCountViewTest(FakefsTestCase):
 
     @patch('datacollections.utils.group_by_columns')
     def test_passes_correct_dataset_to_template(self, mock_group_by_columns):
-        correct_dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
-        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
+        correct_dataset = DataSet.objects.create(filename="File1", file_path="/test/test1.csv")
+        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/test/test1.csv")
         checks = '?checks%5B%5D={}&checks%5B%5D={}'.format('name', 'homeworld')
         mock_group_by_columns.return_value = ['test']
 
@@ -220,8 +215,8 @@ class ValueCountViewTest(FakefsTestCase):
 
     @patch('datacollections.utils.group_by_columns')
     def test_shows_correct_dataset_title(self, mock_group_by_columns):
-        correct_dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
-        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/Desktop/example2.csv")
+        correct_dataset = DataSet.objects.create(filename="File1", file_path="/test/test1.csv")
+        wrong_dataset = DataSet.objects.create(filename="File2", file_path="/test/test1.csv")
         checks = '?checks%5B%5D={0}&checks%5B%5D={1}'.format('name', 'homeworld')
         mock_group_by_columns.return_value = ['test']
 
@@ -230,14 +225,16 @@ class ValueCountViewTest(FakefsTestCase):
 
     @patch('datacollections.utils.group_by_columns')
     def test_parse_correct_columns_from_url(self, mock_group_by_columns):
-        dataset = DataSet.objects.create(filename="File1", file_path="/Desktop/example1.csv")
+        dataset = DataSet.objects.create(filename="File1", file_path="/path/test.csv")
         checks = '?checks%5B%5D={0}&checks%5B%5D={1}'.format('name', 'homeworld')
-        mock_group_by_columns.return_value = ['test']
+        mock_group_by_columns.return_value = 0
 
-        response = self.client.get()
+        response = self.client.get(f'/datacollections/collection_details/value_count/{dataset.id}/{checks}')
+        self.assertEqual(response.context["columns"], ['name', 'homeworld'])
 
-        #request = factory.get(f'/datacollections/collection_details/value_count/{dataset.id}/', {'checks[]': columns})
-        #print(request)
-        # response = self.client.get(f'/datacollections/collection_details/value_count/{dataset.id}/?{checks}')
-        #
-        # self.assertEqual(response.context("checks[]"), columns)
+    # def test_new_test(self):
+    #
+    #     path = '/path/test.csv'
+    #     content = FetchData().transform_data(PAGE_PEOPLE["results"], PAGE_PLANETS["results"])
+    #     with Patcher() as patcher:
+    #         patcher.fs.create_file(path, contents=tocsv(content))
