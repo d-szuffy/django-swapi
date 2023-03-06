@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <form method="POST" action="{% url 'new_collection' %}">
+        <button id="id_fetch_btn" type="submit">Fetch</button>
+        {% csrf_token %}
+    </form>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.level_tag == 'success' %}
+                <p class="has-message" style="color: green;">{{ message }}</p>
+            {% else %}
+                <p class="has-message" style="color: red">{{ message }}</p>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    <table id="id_collections_table">
+        {% for file in data %}
+        <tr>
+            <td>
+                <a href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+  <h1>{{ dataset.filename }}</h1>
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.level_tag == 'success' %}
+                <p class="has-message" style="color: green;">{{ message }}</p>
+            {% else %}
+                <p class="has-message" style="color: red">{{ message }}</p>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <table id="id_collection_details">
+            {% for row in data %}
+                {% if forloop.first %}
+                    <tr>
+                        {% for header in row %}
+                            <th>{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                {% else %}
+                    <tr>
+                            {% for td in row %}
+                                <td>{{ td }}</td>
+                            {% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% endif %}
+</body>
+</html>
