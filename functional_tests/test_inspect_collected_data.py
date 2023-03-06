@@ -1,5 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from . import base
 import os
 from typing import List
@@ -40,7 +42,7 @@ class InspectDataTest(base.FunctionalTest):
         self.browser.add_cookie({'name': 'file_name', 'value': table_rows[0].text})
 
         # He clicks one of them out of curiosity
-        table_rows[0].click()
+        table_rows[0].find_element(By.TAG_NAME, 'a').click()
 
         # He gets redirected to the collection_details page
         self.assertIn('collection_details', self.browser.current_url)
@@ -69,7 +71,11 @@ class InspectDataTest(base.FunctionalTest):
         # To be sure that the button works he clicks it again.
         # Another 10 rows loaded
         load_more_btn = self.browser.find_element(By.ID, 'id_load_more')
-        load_more_btn.click()
+        wait = WebDriverWait(self.browser, 10)
+        button = wait.until(EC.visibility_of_element_located((By.ID, 'id_load_more')))
+        self.browser.execute_script("arguments[0].scrollIntoView();", button)
+
+        button.click()
         table = self.browser.find_element(By.ID, 'id_collection_details')
         table_rows = table.find_elements(By.TAG_NAME, 'tr')
         self.assertEqual(len(table_rows) - 1, 30)
@@ -81,7 +87,7 @@ class InspectDataTest(base.FunctionalTest):
         # A filename appears in the table, and he clicks it.
         self.fetch_data_from_api()
         files_table = self.browser.find_element(By.TAG_NAME, 'td')
-        files_table.click()
+        files_table.find_element(By.TAG_NAME, 'a').click()
 
         # He gets redirected to the detailed page where he can see a table with data.
         data_table = self.browser.find_element(By.ID, 'id_collection_details')

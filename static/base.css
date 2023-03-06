@@ -1,3 +1,8 @@
+.bg-image {
+	background-repeat: no-repeat;
+  	background-attachment: fixed;
+}
+
 .intro {
 	margin-top: 20vh;
 	color: #eedb00;

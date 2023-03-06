@@ -9,18 +9,18 @@
     {% if messages %}
         {% for message in messages %}
             {% if message.level_tag == 'success' %}
-                <p class="has-message" style="color: green;">{{ message }}</p>
+                <p class="has-message alert alert-success" style="margin: 1vh;">{{ message }}</p>
             {% else %}
-                <p class="has-message" style="color: red">{{ message }}</p>
+                <p class="has-message alert alert-error" style="margin: 1vh;">{{ message }}</p>
             {% endif %}
         {% endfor %}
     {% endif %}
     <table id="id_collections_table" class="table table-hover mt-2">
         {% for file in data %}
         <tr>
-            <th scope="row">
+            <td scope="row">
                 <a class="collections-row" href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a>
-            </th>
+            </td>
         </tr>
         {% endfor %}
     </table>
