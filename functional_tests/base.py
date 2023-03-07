@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 from django.conf import settings
+from pathlib import Path
 MAX_WAIT = 300
 
 
@@ -20,8 +21,9 @@ class FunctionalTest(StaticLiveServerTestCase):
         if staging_sever:
             self.live_server_url = "http://" + staging_sever
 
-    # Deleting the files created during functional tests should be automated
-    # This manual removal needs refactoring
+    # Tear down method should somehow serve deleting files created during tests. Manual removal does not work due
+    # to the fact that each method can create various number of files. Probably should use some sort of fake file system
+    # for files created during tests.
     def tearDown(self) -> None:
         self.browser.quit()
 

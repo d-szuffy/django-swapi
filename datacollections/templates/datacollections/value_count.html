@@ -3,14 +3,14 @@
 
 {% block content %}
   <h1 style="color: #eedb00;">{{ dataset.filename }}</h1>
-    <a class="btn btn-dark" href="{% url 'collection_details' dataset.pk %}">Back</a>
+    <a class="btn btn-dark mb-2" href="{% url 'collection_details' dataset.pk %}">Back</a>
 
     {% if messages %}
         {% for message in messages %}
             {% if message.level_tag == 'success' %}
                 <p class="has-message alert alert-success" style="margin: 1vh;">{{ message }}</p>
             {% else %}
-                <p class="has-message alert alert-error" style="margin: 1vh;">{{ message }}</p>
+                <p class="has-message alert alert-danger" style="margin: 1vh;">{{ message }}</p>
             {% endif %}
         {% endfor %}
     {% else %}

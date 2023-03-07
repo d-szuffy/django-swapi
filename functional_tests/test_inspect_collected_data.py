@@ -1,3 +1,5 @@
+import time
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -70,12 +72,10 @@ class InspectDataTest(base.FunctionalTest):
 
         # To be sure that the button works he clicks it again.
         # Another 10 rows loaded
+        self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         load_more_btn = self.browser.find_element(By.ID, 'id_load_more')
-        wait = WebDriverWait(self.browser, 10)
-        button = wait.until(EC.visibility_of_element_located((By.ID, 'id_load_more')))
-        self.browser.execute_script("arguments[0].scrollIntoView();", button)
-
-        button.click()
+        time.sleep(1)
+        load_more_btn.click()
         table = self.browser.find_element(By.ID, 'id_collection_details')
         table_rows = table.find_elements(By.TAG_NAME, 'tr')
         self.assertEqual(len(table_rows) - 1, 30)
@@ -105,7 +105,7 @@ class InspectDataTest(base.FunctionalTest):
         checked_columns_str = ','.join(column.text for column in checked_columns)
         self.browser.add_cookie({'name': 'checked_columns', 'value': checked_columns_str})
         for column in checked_columns:
-            column.find_element(By.ID, 'id_' + column.text).click()
+            column.find_element(By.TAG_NAME, 'label').click()
         value_count_btn.click()
 
         # The page reloads and now the table has columns which have been checked and one extra column labeled "count"
