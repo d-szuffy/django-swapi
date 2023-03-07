@@ -1,5 +1,9 @@
+import time
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from . import base
 import os
 from typing import List
@@ -40,7 +44,7 @@ class InspectDataTest(base.FunctionalTest):
         self.browser.add_cookie({'name': 'file_name', 'value': table_rows[0].text})
 
         # He clicks one of them out of curiosity
-        table_rows[0].click()
+        table_rows[0].find_element(By.TAG_NAME, 'a').click()
 
         # He gets redirected to the collection_details page
         self.assertIn('collection_details', self.browser.current_url)
@@ -68,7 +72,9 @@ class InspectDataTest(base.FunctionalTest):
 
         # To be sure that the button works he clicks it again.
         # Another 10 rows loaded
+        self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         load_more_btn = self.browser.find_element(By.ID, 'id_load_more')
+        time.sleep(1)
         load_more_btn.click()
         table = self.browser.find_element(By.ID, 'id_collection_details')
         table_rows = table.find_elements(By.TAG_NAME, 'tr')
@@ -81,7 +87,7 @@ class InspectDataTest(base.FunctionalTest):
         # A filename appears in the table, and he clicks it.
         self.fetch_data_from_api()
         files_table = self.browser.find_element(By.TAG_NAME, 'td')
-        files_table.click()
+        files_table.find_element(By.TAG_NAME, 'a').click()
 
         # He gets redirected to the detailed page where he can see a table with data.
         data_table = self.browser.find_element(By.ID, 'id_collection_details')
@@ -99,7 +105,7 @@ class InspectDataTest(base.FunctionalTest):
         checked_columns_str = ','.join(column.text for column in checked_columns)
         self.browser.add_cookie({'name': 'checked_columns', 'value': checked_columns_str})
         for column in checked_columns:
-            column.find_element(By.ID, 'id_' + column.text).click()
+            column.find_element(By.TAG_NAME, 'label').click()
         value_count_btn.click()
 
         # The page reloads and now the table has columns which have been checked and one extra column labeled "count"

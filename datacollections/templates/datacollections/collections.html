@@ -1,31 +1,27 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "datacollections/base.html" %}
+{% load static %}
+
+{% block content %}
     <form method="POST" action="{% url 'new_collection' %}">
-        <button id="id_fetch_btn" type="submit">Fetch</button>
+        <button id="id_fetch_btn" type="submit" class="btn btn-dark mt-2">Fetch</button>
         {% csrf_token %}
     </form>
     {% if messages %}
         {% for message in messages %}
             {% if message.level_tag == 'success' %}
-                <p class="has-message" style="color: green;">{{ message }}</p>
+                <p class="has-message alert alert-success" style="margin: 1vh;">{{ message }}</p>
             {% else %}
-                <p class="has-message" style="color: red">{{ message }}</p>
+                <p class="has-message alert alert-danger" style="margin: 1vh;">{{ message }}</p>
             {% endif %}
         {% endfor %}
     {% endif %}
-    <table id="id_collections_table">
+    <table id="id_collections_table" class="table table-hover mt-2">
         {% for file in data %}
         <tr>
-            <td>
-                <a href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a>
+            <td scope="row">
+                <a class="collections-row" href="{% url 'collection_details' file.pk %}">{{ file.filename }} </a>
             </td>
         </tr>
         {% endfor %}
     </table>
-</body>
-</html>
+{% endblock %}

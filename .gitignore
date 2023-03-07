@@ -4,3 +4,5 @@ datacollections/media/
 geckodriver.log
 db.*
 **/__pycache__/
+static/
+**/migrations/

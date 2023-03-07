@@ -1,37 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-  <h1>{{ dataset.filename }}</h1>
+{% extends "datacollections/base.html" %}
+{% load static %}
+
+{% block content %}
+  <h1 style="color: #eedb00;">{{ dataset.filename }}</h1>
+    <a class="btn btn-dark mb-2" href="{% url 'collection_details' dataset.pk %}">Back</a>
+
     {% if messages %}
         {% for message in messages %}
             {% if message.level_tag == 'success' %}
-                <p class="has-message" style="color: green;">{{ message }}</p>
+                <p class="has-message alert alert-success" style="margin: 1vh;">{{ message }}</p>
             {% else %}
-                <p class="has-message" style="color: red">{{ message }}</p>
+                <p class="has-message alert alert-danger" style="margin: 1vh;">{{ message }}</p>
             {% endif %}
         {% endfor %}
     {% else %}
-        <table id="id_collection_details">
+        <table id="id_collection_details" class="table table-hover mt-2">
             {% for row in data %}
                 {% if forloop.first %}
                     <tr>
                         {% for header in row %}
-                            <th>{{ header }}</th>
+                            <th class="collections-row">{{ header }}</th>
                         {% endfor %}
                     </tr>
                 {% else %}
-                    <tr>
+                    <tr class="collections-row">
                             {% for td in row %}
-                                <td>{{ td }}</td>
+                                <td scope="row">{{ td }}</td>
                             {% endfor %}
                     </tr>
                 {% endif %}
             {% endfor %}
         </table>
     {% endif %}
-</body>
-</html>
+{% endblock %}

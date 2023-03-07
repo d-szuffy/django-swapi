@@ -11,11 +11,11 @@ class NewFetchTest(base.FunctionalTest):
         # data from Start Wars universe.
         self.browser.get(self.live_server_url)
 
-        # He notices that page title and header mention Star Wars
+        # He notices that page title and header mention Star Wars and SWAPI
         # this makes him sure he found the correct app
         self.assertIn('Star Wars', self.browser.title)
         header_text = self.browser.find_element(By.TAG_NAME, "h1").text
-        self.assertIn("Star Wars", header_text)
+        self.assertIn("SWAPI", header_text)
 
         # He notices a link named "collections"
         navbar_text = self.browser.find_element(By.CLASS_NAME, "navbar").text

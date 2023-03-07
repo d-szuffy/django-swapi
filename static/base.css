@@ -1,0 +1,17 @@
+.bg-image {
+	background-repeat: no-repeat;
+  	background-attachment: fixed;
+}
+
+.intro {
+	margin-top: 20vh;
+	color: #eedb00;
+	transform:
+	perspective(105em)
+	rotateX(30deg);
+}
+
+.collections-row {
+	text-decoration: none;
+	color: #eedb00;
+}
